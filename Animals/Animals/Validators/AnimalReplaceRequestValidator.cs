@@ -1,11 +1,11 @@
-﻿using System.Text.RegularExpressions;
+﻿using Animals.DTOs;
 using FluentValidation;
-using Animals.DTOs;
+
 namespace Animals.Validators
 {
-    public class AnimalCreateRequestValidator: AbstractValidator<CreateAnimalRequest>
+    public class AnimalReplaceRequestValidator : AbstractValidator<ReplaceAnimalRequest>
     {
-        public AnimalCreateRequestValidator()
+        public AnimalReplaceRequestValidator()
         {
             RuleFor(s => s.Name).MaximumLength(200).NotNull();
             RuleFor(s => s.Category).MaximumLength(200).NotNull();
