@@ -76,6 +76,28 @@ namespace Animals.Controllers
             }
         }
 
+        [HttpPut("{id}")]
+        public IActionResult ReplaceAnimal(int id, ReplaceAnimalRequest request)
+        {
+            using (var sqlConnection = new SqlConnection(_configuration.GetConnectionString("Default")))
+            {
+                var sqlCommand = new SqlCommand("UPDATE animals SET Name = @1, Description = @2, Category = @3, Area = @4 WHERE id_animal = @5", sqlConnection);
+                sqlCommand.Parameters.AddWithValue("@1", request.Name);
+                sqlCommand.Parameters.AddWithValue("@2", request.Description);
+                sqlCommand.Parameters.AddWithValue("@3", request.Category);
+                sqlCommand.Parameters.AddWithValue("@4", request.Area);
+                sqlCommand.Parameters.AddWithValue("@5", id);
+                sqlConnection.Open();
+
+                var affectedRows = sqlCommand.ExecuteNonQuery();
+                if (affectedRows==0)
+                {
+                    return NotFound();
+                }
+                return NoContent();
+            }
+        }
+        
         [HttpDelete("{id}")]
         public IActionResult DeleteAnimal(int id)
         {
