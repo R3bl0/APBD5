@@ -42,7 +42,6 @@ namespace Animals.Controllers
         [HttpGet("{id}")]
         public IActionResult GetAnimal(int id)
         {
-            var response = new List<GetAnimalResponse>();
             var sqlConnection = new SqlConnection(_configuration.GetConnectionString("Default"));
             var sqlCommand = new SqlCommand("SELECT * FROM animals WHERE Id_Animal = @1", sqlConnection);
             sqlCommand.Parameters.AddWithValue("@1", id);
@@ -57,6 +56,44 @@ namespace Animals.Controllers
                         reader.GetString(4)
                 )
             );
+        }
+
+        [HttpPost]
+        public IActionResult CreateAnimal(CreateAnimalRequest request)
+        {
+            using (var sqlConnection = new SqlConnection(_configuration.GetConnectionString("Default")))
+            {
+                var sqlCommand = new SqlCommand("INSERT INTO animals (Name, Description, Category, Area) values (@1,@2,@3,@4);SELECT CAST(SCOPE_IDENTITY() as int)", sqlConnection);
+                sqlCommand.Parameters.AddWithValue("@1", request.Name);
+                sqlCommand.Parameters.AddWithValue("@2", request.Description);
+                sqlCommand.Parameters.AddWithValue("@3", request.Category);
+                sqlCommand.Parameters.AddWithValue("@4", request.Area);
+                sqlCommand.Connection.Open();
+
+                var id = sqlCommand.ExecuteScalar();
+
+                return Created($"animal/{id}", new CreateAnimalResponse((int)id, request));
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteAnimal(int id)
+        {
+            using (var sqlConnection = new SqlConnection(_configuration.GetConnectionString("Default")))
+            {
+                var sqlCommand = new SqlCommand("DELETE FROM animals WHERE id_animal=@1", sqlConnection);
+                sqlCommand.Parameters.AddWithValue("@1", id);
+                sqlConnection.Open();
+
+                var affectedRows = sqlCommand.ExecuteNonQuery();
+
+                if (affectedRows==0)
+                {
+                    return NotFound();
+                }
+
+                return NoContent();
+            }
         }
     }
 }
