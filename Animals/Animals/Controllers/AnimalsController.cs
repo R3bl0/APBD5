@@ -15,13 +15,19 @@ namespace Animals.Controllers
             _configuration = configuration;
         }
 
-        [HttpGet]
-        public IActionResult GetAll()
+        [HttpGet("{orderBy}")]
+        public IActionResult GetAll(string orderBy = "name")
         {
             var response = new List<GetAnimalsResponse>();
+            var list = new List<string>{"name", "description", "category", "area"};
             using (var sqlConnection = new SqlConnection(_configuration.GetConnectionString("Default")))
             {
-                var sqlCommand = new SqlCommand("SELECT * FROM animals", sqlConnection);
+                if (!list.Contains(orderBy))
+                {
+                    Console.WriteLine("blad");
+                    return BadRequest();
+                }
+                var sqlCommand = new SqlCommand($"SELECT * FROM animals ORDER BY {orderBy} ASC", sqlConnection);
                 sqlCommand.Connection.Open();
                 var reader = sqlCommand.ExecuteReader();
                 while (reader.Read())
@@ -49,11 +55,11 @@ namespace Animals.Controllers
             var reader = sqlCommand.ExecuteReader();
             if (!reader.Read()) return NotFound();
             return Ok(new GetAnimalResponse(
-                        reader.GetInt32(0),
-                        reader.GetString(1),
-                        reader.GetString(2),
-                        reader.GetString(3),
-                        reader.GetString(4)
+                    reader.GetInt32(0),
+                    reader.GetString(1),
+                    reader.GetString(2),
+                    reader.GetString(3),
+                    reader.GetString(4)
                 )
             );
         }
